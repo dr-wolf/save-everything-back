@@ -11,6 +11,7 @@ use \Psr\Http\Message\ResponseInterface as Response;
 use Managers\DatasetManager;
 use Managers\PostManager;
 use Models\Dataset;
+use Models\Post;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -40,6 +41,27 @@ $app->post('/{dataset}/', function (Request $request, Response $response) {
     return $response->withJson($postManager->create($metadata, $datasetGuid));
 });
 
+$app->post('/{dataset}/{post}', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postGuid = $request->getAttribute('post');
+    $metadata = json_decode($request->getBody(), true);
+    $postManager = new PostManager();
+    return $response->withJson($postManager->update($metadata, $postGuid, $datasetGuid));
+});
+
+$app->get('/{dataset}/{post}', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postGuid = $request->getAttribute('post');
+    return $response->withJson(new Post($postGuid, $datasetGuid));
+});
+
+$app->delete('/{dataset}/{post}', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postGuid = $request->getAttribute('post');
+    $postManager = new PostManager();
+    $postManager->delete($datasetGuid, $postGuid);
+    return $response->withJson(array('guid' => $postGuid));
+});
 
 $container = $app->getContainer();
 $container['errorHandler'] = function ($container) {

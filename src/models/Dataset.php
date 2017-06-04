@@ -13,10 +13,9 @@ use JsonSerializable;
 use Utils\FileList;
 use Utils\PathGenerator;
 
-class Dataset  implements Iterator, JsonSerializable
+class Dataset  implements JsonSerializable
 {
     private $guid;
-    private $position = 0;
     private $posts = array();
 
     /**
@@ -80,26 +79,6 @@ class Dataset  implements Iterator, JsonSerializable
     public function postCount(): int
     {
         return count($this->posts);
-    }
-
-    public function rewind() {
-        $this->position = 0;
-    }
-
-    public function current() {
-        return $this->posts[$this->position];
-    }
-
-    public function key() {
-        return $this->position;
-    }
-
-    public function next() {
-        ++$this->position;
-    }
-
-    public function valid() {
-        return isset($this->posts[$this->position]);
     }
 
 }

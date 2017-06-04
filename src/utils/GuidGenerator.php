@@ -34,6 +34,10 @@ class GuidGenerator
     }
 
 
+    /**
+     * @param string $datasetGuid
+     * @return string
+     */
     public static function postGuid(string $datasetGuid): string
     {
         do {

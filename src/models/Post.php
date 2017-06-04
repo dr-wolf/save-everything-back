@@ -9,6 +9,7 @@ namespace Models;
 
 use Exception;
 use JsonSerializable;
+use Utils\FileJson;
 use Utils\FileList;
 use Utils\PathGenerator;
 
@@ -18,14 +19,19 @@ class Post implements JsonSerializable
     private $metadata;
     private $files;
 
-
+    /**
+     * Post constructor.
+     * @param string $guid
+     * @param string $datasetGuid
+     * @throws Exception
+     */
     public function __construct(string $guid, string $datasetGuid)
     {
         $this->guid = $guid;
         $files_path = PathGenerator::makePostMetaPath($guid, $datasetGuid);
         $meta_path = PathGenerator::makePostPublicPath($guid, $datasetGuid) . '/metadata.json';
         if (file_exists($files_path) && file_exists($meta_path)) {
-            $this->metadata = json_decode(file_get_contents($meta_path), true);
+            $this->metadata = FileJson::load($meta_path);
             $this->files = FileList::load($files_path);
         } else {
             throw new Exception("Post $guid does not exists", 404);
@@ -34,7 +40,7 @@ class Post implements JsonSerializable
 
     public function save()
     {
-        file_get_contents(PathGenerator::makePostPublicPath() . '/metadata.json', json_encode($this->metadata));
+        FileJson::save(PathGenerator::makePostPublicPath() . '/metadata.json', $this->metadata);
         FileList::save(PathGenerator::makeDatasetMetaPath($this->guid), $this->files);
     }
 
