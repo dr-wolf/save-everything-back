@@ -4,7 +4,9 @@
     },
     "autoload": {
         "psr-4": {
-            "DB\\": "src/db/"
+            "Managers\\": "src/managers/",
+            "Models\\": "src/models/",
+            "Utils\\": "src/utils/"
         }
     }
 }

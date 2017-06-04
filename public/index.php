@@ -8,22 +8,44 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+use Managers\DatasetManager;
+use Managers\PostManager;
+use Models\Dataset;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 $app = new \Slim\App;
 
-$app->get('/', function (Request $request, Response $response) {
+$app->post('/', function (Request $request, Response $response) {
+    $datasetManager = new DatasetManager();
+    return $response->withJson($datasetManager->create());
+});
 
-    $s = new DB\PostDB();
-    return $response->withJson($s->getAll(), 201);
+$app->get('/{dataset}', function (Request $request, Response $response) {
+    $guid = $request->getAttribute('dataset');
+    return $response->withJson(new Dataset($guid));
+});
 
+$app->delete('/{dataset}', function (Request $request, Response $response) {
+    $guid = $request->getAttribute('dataset');
+    $datasetManager = new DatasetManager();
+    $datasetManager->delete($guid);
+    return $response->withJson(array('guid' => $guid));
+});
+
+$app->post('/{dataset}/', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $metadata = json_decode($request->getBody(), true);
+    $postManager = new PostManager();
+    return $response->withJson($postManager->create($metadata, $datasetGuid));
 });
 
 
-$app->get('/hello/{name}', function (Request $request, Response $response) {
-    $name = $request->getAttribute('name');
-
-    return $response->withJson(array('name' => $name), 201);
-});
+$container = $app->getContainer();
+$container['errorHandler'] = function ($container) {
+    return function (Request $request, Response $response, $exception) {
+        return $response->withJson(array("message" => $exception->getMessage()))->withStatus($exception->getCode());
+    };
+};
 
 $app->run();
