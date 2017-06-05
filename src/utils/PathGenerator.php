@@ -11,8 +11,8 @@ namespace Utils;
 class PathGenerator
 {
 
-    private static $meta = '/../datasets/';
-    private static $public = '/';
+    private static $meta = '/../../datasets/';
+    private static $public = '/../../public/';
 
     /**
      * @param string $guid
@@ -20,7 +20,7 @@ class PathGenerator
      */
     public static function makeDatasetPublicPath(string $guid): string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . self::$public . $guid;
+        return __DIR__ . self::$public . $guid;
     }
 
     /**
@@ -29,7 +29,7 @@ class PathGenerator
      */
     public static function makeDatasetMetaPath(string $guid): string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . self::$meta . $guid;
+        return __DIR__ . self::$meta . $guid;
     }
 
     /**
@@ -39,7 +39,7 @@ class PathGenerator
      */
     public static function makePostPublicPath(string $guid, string $datasetGuid): string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . self::$public . $datasetGuid . '/' . $guid;
+        return __DIR__ . self::$public . $datasetGuid . '/' . $guid;
     }
 
     /**
@@ -49,6 +49,6 @@ class PathGenerator
      */
     public static function makePostMetaPath(string $guid, string $datasetGuid): string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . self::$meta . $datasetGuid . '/' . $guid;
+        return __DIR__ . self::$meta . $datasetGuid . '/' . $guid;
     }
 }

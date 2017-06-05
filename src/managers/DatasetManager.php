@@ -28,8 +28,9 @@ class DatasetManager
     {
         $dataset = new Dataset($guid);
         if ($dataset->postCount() == 0) {
-            @unlink(PathGenerator::makeDatasetMetaPath($guid));
-            @unlink(PathGenerator::makeDatasetPublicPath($guid));
+            unlink(PathGenerator::makeDatasetMetaPath($guid). '/meta');
+            rmdir(PathGenerator::makeDatasetMetaPath($guid));
+            rmdir(PathGenerator::makeDatasetPublicPath($guid));
         } else {
             throw new Exception("Dataset $guid is not empty", 400);
         }
