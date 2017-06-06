@@ -36,7 +36,7 @@ class Dataset  implements JsonSerializable
 
     public function save()
     {
-        $path = PathGenerator::makeDatasetMetaPath($this->guid) . '/meta.json';
+        $path = PathGenerator::makeDatasetMetaPath($this->guid) . '/meta';
         FileList::save($path, $this->posts);
     }
 
@@ -44,7 +44,9 @@ class Dataset  implements JsonSerializable
     {
         return array(
             'guid' => $this->guid,
-            'posts' => $this->posts
+            'posts' => array_map(function ($p) {
+                return '/'.$this->guid.'/'.$p;
+            }, $this->posts)
         );
     }
 

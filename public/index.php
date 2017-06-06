@@ -59,7 +59,7 @@ $app->delete('/{dataset}/{post}', function (Request $request, Response $response
     $datasetGuid = $request->getAttribute('dataset');
     $postGuid = $request->getAttribute('post');
     $postManager = new PostManager();
-    $postManager->delete($datasetGuid, $postGuid);
+    $postManager->delete($postGuid, $datasetGuid);
     return $response->withJson(array('guid' => $postGuid));
 });
 

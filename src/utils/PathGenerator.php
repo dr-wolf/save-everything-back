@@ -51,4 +51,15 @@ class PathGenerator
     {
         return __DIR__ . self::$meta . $datasetGuid . '/' . $guid;
     }
+
+    /**
+     * @param string $guid
+     * @param string $postGuid
+     * @param string $datasetGuid
+     * @return string
+     */
+    public static function makeFilePath(string $guid, string $postGuid, string $datasetGuid): string
+    {
+        return __DIR__ . self::$public . $datasetGuid . '/' . $postGuid . '/' . $guid;
+    }
 }

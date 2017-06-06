@@ -38,10 +38,10 @@ class Post implements JsonSerializable
         }
     }
 
-    public function save()
+    public function save(string $datasetGuid)
     {
-        FileJson::save(PathGenerator::makePostPublicPath() . '/metadata.json', $this->metadata);
-        FileList::save(PathGenerator::makeDatasetMetaPath($this->guid), $this->files);
+        FileJson::save(PathGenerator::makePostPublicPath($this->guid, $datasetGuid) . '/metadata.json', $this->metadata);
+        FileList::save(PathGenerator::makePostMetaPath($this->guid, $datasetGuid), $this->files);
     }
 
     public function jsonSerialize()
@@ -49,7 +49,7 @@ class Post implements JsonSerializable
         return array(
             'guid' => $this->guid,
             'metadata' => $this->metadata,
-            'filea' => $this->files
+            'files' => $this->files
         );
     }
 
@@ -75,6 +75,10 @@ class Post implements JsonSerializable
     public function setMetadata($metadata)
     {
         $this->metadata = $metadata;
+    }
+
+    public function getFileGuids() {
+        return array_values($this->files);
     }
 
 }

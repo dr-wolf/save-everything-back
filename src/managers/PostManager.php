@@ -35,18 +35,23 @@ class PostManager
     {
         $post = new Post($postGuid, $datasetGuid);
         $post->setMetadata($metadata);
-        $post->save();
+        $post->save($datasetGuid);
         return $post;
     }
 
     public function delete(string $postGuid, string $datasetGuid)
     {
+        $post = new Post($postGuid, $datasetGuid);
+        foreach ($post->getFileGuids() as $file) {
+            @unlink(PathGenerator::makeFilePath($file, $postGuid, $datasetGuid));
+        }
+        @unlink(PathGenerator::makePostPublicPath($postGuid, $datasetGuid) . '/metadata.json');
+        @rmdir(PathGenerator::makePostPublicPath($postGuid, $datasetGuid));
+        @unlink(PathGenerator::makePostMetaPath($postGuid, $datasetGuid));
+
         $dataset = new Dataset($datasetGuid);
         $dataset->deletePostGuid($postGuid);
         $dataset->save();
-
-        @unlink(PathGenerator::makePostPublicPath($postGuid, $datasetGuid));
-        @unlink(PathGenerator::makePostMetaPath($postGuid, $datasetGuid));
     }
 
 }
