@@ -7,51 +7,80 @@
 
 namespace Managers;
 
-use Models\Dataset;
-use Models\Post;
-use Utils\FileJson;
-use Utils\GuidGenerator;
-use Utils\PathGenerator;
+use Exception;
+use Models\{ Dataset, Post };
+use Utils\{ FileJson, GuidGenerator, PathGenerator };
 
 class PostManager
 {
-
     public function create($metadata, string $datasetGuid): Post
     {
         $guid = GuidGenerator::postGuid($datasetGuid);
 
         $dataset = new Dataset($datasetGuid);
-        $dataset->addPostGuid($guid);
+        $dataset->addPostUid($guid);
         $dataset->save();
 
         mkdir(PathGenerator::makePostPublicPath($guid, $datasetGuid));
         touch(PathGenerator::makePostMetaPath($guid, $datasetGuid));
-        FileJson::save(PathGenerator::makePostPublicPath($guid, $datasetGuid) . '/metadata.json', $metadata);
+        FileJson::save(PathGenerator::makePostPublicPath($guid, $datasetGuid).'/'.Post::$METADATA_FILENAME, $metadata);
 
         return new Post($guid, $datasetGuid);
     }
 
-    public function update($metadata, string $postGuid, string $datasetGuid): Post
+    public function update($metadata, string $postUid, string $datasetGuid): Post
     {
-        $post = new Post($postGuid, $datasetGuid);
+        $post = new Post($postUid, $datasetGuid);
         $post->setMetadata($metadata);
-        $post->save($datasetGuid);
+        $post->save();
         return $post;
     }
 
-    public function delete(string $postGuid, string $datasetGuid)
+    public function delete(string $postUid, string $datasetGuid)
     {
-        $post = new Post($postGuid, $datasetGuid);
-        foreach ($post->getFileGuids() as $file) {
-            @unlink(PathGenerator::makeFilePath($file, $postGuid, $datasetGuid));
+        $post = new Post($postUid, $datasetGuid);
+        foreach ($post->getFiles() as $file) {
+            @unlink(PathGenerator::makeFilePath($file, $postUid, $datasetGuid));
         }
-        @unlink(PathGenerator::makePostPublicPath($postGuid, $datasetGuid) . '/metadata.json');
-        @rmdir(PathGenerator::makePostPublicPath($postGuid, $datasetGuid));
-        @unlink(PathGenerator::makePostMetaPath($postGuid, $datasetGuid));
+        @unlink(PathGenerator::makePostPublicPath($postUid, $datasetGuid).'/'.Post::$METADATA_FILENAME);
+        @rmdir(PathGenerator::makePostPublicPath($postUid, $datasetGuid));
+        @unlink(PathGenerator::makePostMetaPath($postUid, $datasetGuid));
 
         $dataset = new Dataset($datasetGuid);
-        $dataset->deletePostGuid($postGuid);
+        $dataset->deletePostUid($postUid);
         $dataset->save();
+    }
+
+    public function uploadFile()
+    {
+
+    }
+
+    public function saveFile(string $filename, $content, string $postUid, string $datasetGuid): Post
+    {
+        if ($filename == Post::$METADATA_FILENAME) {
+            throw new Exception('Filename '.Post::$METADATA_FILENAME.' is reserved', 400);
+        }
+        $file_path = PathGenerator::makePostPublicPath($postUid, $datasetGuid) . '/' .$filename;
+        $post = new Post($postUid, $datasetGuid);
+        if ($post->hasFile($filename)) {
+            @unlink($file_path);
+        } else {
+            $post->addFile($filename);
+        }
+        file_put_contents($file_path, $content);
+        $post->save();
+        return $post;
+    }
+
+    public function deleteFile(string $filename, string $postUid, string $datsetGuid): Post
+    {
+        $post = new Post($postUid, $datsetGuid);
+        if ($post->hasFile($filename)) {
+            @unlink(PathGenerator::makePostPublicPath($postUid, $datsetGuid) . '/' .$filename);
+            $post->deleteFile($filename);
+        }
+        return $post;
     }
 
 }

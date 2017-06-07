@@ -9,8 +9,7 @@ namespace Managers;
 
 use Exception;
 use Models\Dataset;
-use Utils\GuidGenerator;
-use Utils\PathGenerator;
+use Utils\{ GuidGenerator, PathGenerator };
 
 class DatasetManager
 {

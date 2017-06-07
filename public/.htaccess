@@ -2,5 +2,7 @@ DirectorySlash Off
 
 RewriteEngine on
 RewriteBase /
+
+RewriteCond %{REQUEST_METHOD} !GET [OR]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* index.php [L]

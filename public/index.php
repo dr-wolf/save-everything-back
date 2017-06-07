@@ -63,6 +63,40 @@ $app->delete('/{dataset}/{post}', function (Request $request, Response $response
     return $response->withJson(array('guid' => $postGuid));
 });
 
+$app->post('/{dataset}/{post}/', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postGuid = $request->getAttribute('post');
+
+    /*TODO: implement post upload*/
+
+    $postManager = new PostManager();
+    return $response->withBody("test");
+});
+
+$app->get('/{dataset}/{post}/{filename}', function (Request $request, Response $response) {
+    $postUid = $request->getAttribute('post');
+    $filename = $request->getAttribute('filename');
+    throw new Exception("File $filename does not exists in post $postUid", 404);
+});
+
+
+$app->put('/{dataset}/{post}/{filename}', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postUid = $request->getAttribute('post');
+    $filename = $request->getAttribute('filename');
+    $body = $request->getBody()->getContents();
+    $postManager = new PostManager();
+    return $response->withJson($postManager->saveFile($filename, $body, $postUid, $datasetGuid));
+});
+
+$app->delete('/{dataset}/{post}/{filename}', function (Request $request, Response $response) {
+    $datasetGuid = $request->getAttribute('dataset');
+    $postUid = $request->getAttribute('post');
+    $filename = $request->getAttribute('filename');
+    $postManager = new PostManager();
+    return $response->withJson($postManager->deleteFile($filename, $postUid, $datasetGuid));
+});
+
 $container = $app->getContainer();
 $container['errorHandler'] = function ($container) {
     return function (Request $request, Response $response, $exception) {

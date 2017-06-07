@@ -8,10 +8,8 @@
 namespace Models;
 
 use Exception;
-use Iterator;
 use JsonSerializable;
-use Utils\FileList;
-use Utils\PathGenerator;
+use Utils\{ FileList, PathGenerator };
 
 class Dataset  implements JsonSerializable
 {
@@ -51,28 +49,28 @@ class Dataset  implements JsonSerializable
     }
 
     /**
-     * @param string $guid
+     * @param string $uid
      * @return bool
      */
-    public function hasPostGuid(string $guid): bool
+    public function hasPostUid(string $uid): bool
     {
-        return in_array($guid, $this->posts);
+        return in_array($uid, $this->posts);
     }
 
     /**
-     * @param string $guid
+     * @param string $uid
      */
-    public function addPostGuid(string $guid)
+    public function addPostUid(string $uid)
     {
-        $this->posts[] = $guid;
+        $this->posts[] = $uid;
     }
 
     /**
-     * @param string $guid
+     * @param string $uid
      */
-    public function deletePostGuid(string $guid)
+    public function deletePostUid(string $uid)
     {
-        $this->posts = array_diff($this->posts, array($guid));
+        $this->posts = array_diff($this->posts, array($uid));
     }
 
     /**

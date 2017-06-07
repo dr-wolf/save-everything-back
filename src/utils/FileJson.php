@@ -7,7 +7,6 @@
 
 namespace Utils;
 
-
 class FileJson
 {
     /**

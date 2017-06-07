@@ -9,56 +9,60 @@ namespace Models;
 
 use Exception;
 use JsonSerializable;
-use Utils\FileJson;
-use Utils\FileList;
-use Utils\PathGenerator;
+use Utils\{ FileJson, FileList, PathGenerator };
 
 class Post implements JsonSerializable
 {
-    private $guid;
-    private $metadata;
-    private $files;
+    public static $METADATA_FILENAME = 'metadata.json';
+
+    private $uid;
+    private $datasetGuid;
+    private $metadata = null;
+    private $files = array();
 
     /**
      * Post constructor.
-     * @param string $guid
+     * @param string $uid
      * @param string $datasetGuid
      * @throws Exception
      */
-    public function __construct(string $guid, string $datasetGuid)
+    public function __construct(string $uid, string $datasetGuid)
     {
-        $this->guid = $guid;
-        $files_path = PathGenerator::makePostMetaPath($guid, $datasetGuid);
-        $meta_path = PathGenerator::makePostPublicPath($guid, $datasetGuid) . '/metadata.json';
+        $this->uid = $uid;
+        $this->datasetGuid = $datasetGuid;
+        $files_path = PathGenerator::makePostMetaPath($uid, $datasetGuid);
+        $meta_path = PathGenerator::makePostPublicPath($uid, $datasetGuid).'/'.self::$METADATA_FILENAME;
         if (file_exists($files_path) && file_exists($meta_path)) {
             $this->metadata = FileJson::load($meta_path);
             $this->files = FileList::load($files_path);
         } else {
-            throw new Exception("Post $guid does not exists", 404);
+            throw new Exception("Post $uid does not exists", 404);
         }
     }
 
-    public function save(string $datasetGuid)
+    public function save()
     {
-        FileJson::save(PathGenerator::makePostPublicPath($this->guid, $datasetGuid) . '/metadata.json', $this->metadata);
-        FileList::save(PathGenerator::makePostMetaPath($this->guid, $datasetGuid), $this->files);
+        FileJson::save(PathGenerator::makePostPublicPath($this->uid, $this->datasetGuid).'/'.self::$METADATA_FILENAME, $this->metadata);
+        FileList::save(PathGenerator::makePostMetaPath($this->uid, $this->datasetGuid), $this->files);
     }
 
     public function jsonSerialize()
     {
         return array(
-            'guid' => $this->guid,
+            'uid' => $this->uid,
             'metadata' => $this->metadata,
-            'files' => $this->files
+            'files' => array_map(function($f) {
+                return '/'.$this->datasetGuid.'/'.$this->uid.'/'.$f;
+            }, $this->files)
         );
     }
 
     /**
      * @return string
      */
-    public function getGuid(): string
+    public function getUid(): string
     {
-        return $this->guid;
+        return $this->uid;
     }
 
     /**
@@ -77,8 +81,28 @@ class Post implements JsonSerializable
         $this->metadata = $metadata;
     }
 
-    public function getFileGuids() {
+    public function getFiles()
+    {
         return array_values($this->files);
+    }
+
+    public function hasFile(string $filename): bool
+    {
+        return in_array($filename, $this->files);
+    }
+
+    public function addFile(string $filename)
+    {
+        if (!$this->hasFile($filename)) {
+            $this->files[] = $filename;
+        } else {
+            throw new Exception("File $filename already exists in post $this->uid", 400);
+        }
+    }
+
+    public function deleteFile(string $filename)
+    {
+        $this->files = array_diff($this->files, array($filename));
     }
 
 }
